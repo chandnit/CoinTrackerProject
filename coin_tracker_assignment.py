@@ -127,12 +127,12 @@ def retrieve_latest_balance(address):
 
 #calls the api to fetch the lastest transactions
 def retrieve_latest_transactions(address):
+    #limited to 5 transactions for demo purposes
     url = f'https://api.blockchair.com/bitcoin/dashboards/address/{address}?limit=5'
     response = requests.get(url)
     data = response.json()['data']
     transaction_hashes = data[address]['transactions']
     return transaction_hashes
-
 
 #updates the current transactions in the database with unique transactions returned from the api
 def update_transaction_list(local_transactions, api_transactions):
@@ -176,7 +176,7 @@ def get_all_addresses(conn):
     return addresses;
 
 def main():
-    # create the db in memory
+    #create the db in memory
     conn = create_connection(':memory:')
 
     #create table structure
@@ -198,7 +198,7 @@ def main():
     address_id_1 = add_address(conn, address_info_1)
     address_id_2 = add_address(conn, address_info_2)
 
-    #print address table to verify values were inserted correctly
+    #print addresses table to verify values were inserted correctly
     print("Address Table after inserting new addresses - Requirement #1")
     print_address_table(conn)
     print('\n')
@@ -206,7 +206,7 @@ def main():
     #Requirement #1- Delete address from db
     delete_address_db(conn, address_for_cade_1)
 
-    #print address table to verify address was deleted from db
+    #print addresses table to verify address was deleted from db
     print("Address Table after removing first address- Requirement #1")
     print_address_table(conn)
     print('\n')
@@ -217,12 +217,12 @@ def main():
     print_address_table(conn)
     print('\n')
 
-    # Getting all addresses in db
+    #getting all addresses in db
     addresses =  get_all_addresses(conn)
 
     #Requirement #2, #3 Synchronize bitcoin wallet transactions for the addresses and 
     #retrieve the current balances and transactions for each bitcoin address. 
-    #Have limited it to 5 responses per address so that it finishes in reasonable amount of time
+    #have limited it to 5 responses per address so that it finishes in reasonable amount of time
     for address in addresses:
         latest_balance = retrieve_latest_balance(address[1])
         if(latest_balance != address[3]):
@@ -231,14 +231,12 @@ def main():
         for transactions_details in get_transactions:
          add_transaction(conn, transactions_details)
 
-    #since we deleted and reinserted the user '12xQ9k5ousS8MqNsMBqHKtjAtCuKezm2Ju', it will be at the end of the db. Another thing to note is the balance has been updated from the call to the API
+    #since we deleted and reinserted the user '12xQ9k5ousS8MqNsMBqHKtjAtCuKezm2Ju', it will be at the end of the addresses. Another thing to note is the balance has been updated from the call to the API
     print("Address Table With Updated Balance After API call - Requirement #2, #3")
     print_address_table(conn)
     print('\n')
 
-
-    
-    # print the transactions after the call the to API, this will sync the transactions to the db. I have limited it to 5 per address due to the amount of data
+    #print the transactions after the call the to API, this will sync the transactions to the transactions table. I have limited it to 5 per address due to the amount of data
     print("5 Transactions Per Address in Address Table - Requirement #2, #3")
     get_transactions = get_all_transactions(conn)
     print(get_transactions)
